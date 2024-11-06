@@ -10,7 +10,6 @@ export const StudentContainer = styled.div`
     padding: 5px 0;
   }
 
-  // estilo para que apenas divs que sejam seguidas por outras divs tenham esse determinado estilo.
   div + div {
     border-top: 1px solid #eee;
   }
