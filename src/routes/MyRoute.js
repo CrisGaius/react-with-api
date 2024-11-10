@@ -1,9 +1,10 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
 
 export default function MyRoute({ component: Component, isClosed, ...rest }) {
-  const isLogged = false;
+  const isLogged = useSelector((state) => state.auth.isLoggedIn);
 
   if (isClosed && !isLogged) {
     return (
