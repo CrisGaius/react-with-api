@@ -8,10 +8,13 @@ import { Form } from "./styled";
 import axios from "../../services/axios";
 import history from "../../services/history";
 
+import Loading from "../../components/Loading";
+
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -35,6 +38,8 @@ export default function Register() {
 
     if (formErrors) return;
 
+    setIsLoading(true);
+
     try {
       await axios.post("/users/", {
         name,
@@ -43,16 +48,22 @@ export default function Register() {
       });
 
       toast.success("Você fez seu cadastro");
+
+      setIsLoading(false);
+
       history.push("/login");
     } catch (error) {
       const errors = get(error, "response.data.errors", []);
 
       errors.map((err) => toast.error(err));
+
+      setIsLoading(false);
     }
   }
 
   return (
     <Container>
+      <Loading isLoading={isLoading} />
       <h1>Create your account</h1>
       <Form onSubmit={handleSubmit}>
         <label htmlFor="name">

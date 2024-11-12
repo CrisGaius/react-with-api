@@ -9,19 +9,25 @@ import { ProfilePicture, StudentContainer } from "./styled";
 
 import axios from "../../services/axios";
 
+import Loading from "../../components/Loading";
+
 export default function Students() {
   const [students, setStudents] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function getData() {
+      setIsLoading(true);
       const response = await axios.get("/students");
       setStudents(response.data);
+      setIsLoading(false);
     }
 
     getData();
   }, []);
   return (
     <Container>
+      <Loading isLoading={isLoading} />
       <h1>Students</h1>
       <StudentContainer>
         {students.map((student) => (
