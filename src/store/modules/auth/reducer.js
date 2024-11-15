@@ -30,6 +30,24 @@ export default function (state = initialState, action) {
       return newState;
     }
 
+    case types.REGISTER_SUCCESS: {
+      const newState = { ...state };
+      newState.isLoading = false;
+      return newState;
+    }
+
+    case types.REGISTER_FAILURE: {
+      const newState = { ...initialState };
+      newState.isLoading = false;
+      return newState;
+    }
+
+    case types.REGISTER_REQUEST: {
+      const newState = { ...initialState };
+      newState.isLoading = true;
+      return newState;
+    }
+
     default: {
       return state;
     }

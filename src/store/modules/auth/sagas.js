@@ -29,8 +29,30 @@ function persistRehydrate({ payload }) {
   axios.defaults.headers.Authorization = `Bearer ${token}`;
 }
 
-function registerRequest({ payload }) {
-  const { id, name, email, password } = payload;
+function* registerRequest({ payload }) {
+  const { userId, name, email, password } = payload;
+  try {
+    if (userId) {
+      yield call(axios.put, "users/", {
+        email,
+        name,
+        password: password || undefined,
+      });
+      toast.success("Account has been updated.");
+      yield put(actions.registerSuccess({ name, email, password }));
+    }
+  } catch (e) {
+    const errors = get(e, "response.data.errors", []);
+    // const status = get(e, "response.status", 0);
+
+    if (errors.length > 0) {
+      errors.map((error) => toast.error(error));
+    } else {
+      toast.error("Unknown error.");
+    }
+
+    yield put(actions.registerFailure());
+  }
 }
 
 export default all([
