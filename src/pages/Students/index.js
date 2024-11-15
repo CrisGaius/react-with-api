@@ -25,6 +25,7 @@ export default function Students() {
 
     getData();
   }, []);
+
   return (
     <Container>
       <Loading isLoading={isLoading} />
