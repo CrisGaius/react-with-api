@@ -2,8 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom/";
 
 import { get } from "lodash";
-import { FaUserCircle, FaEdit, FaWindowClose } from "react-icons/fa";
+import {
+  FaUserCircle,
+  FaEdit,
+  FaWindowClose,
+  FaExclamation,
+} from "react-icons/fa";
 
+import { toast } from "react-toastify";
 import { Container } from "../../styles/GlobalStyles";
 import { ProfilePicture, StudentContainer } from "./styled";
 
@@ -25,6 +31,23 @@ export default function Students() {
 
     getData();
   }, []);
+
+  const handleDeleteConfirm = (e) => {
+    e.preventDefault();
+    const exclamationIcon = e.currentTarget.nextSibling;
+    exclamationIcon.setAttribute("display", "block");
+    e.currentTarget.remove();
+  };
+
+  const handleDelete = async (e, id) => {
+    try {
+      await axios.delete(`/students/${id}`);
+      e.target.parentElement.remove();
+    } catch (err) {
+      const errors = get(err, "response.data.errors", []);
+      errors.map((error) => toast.error(error));
+    }
+  };
 
   return (
     <Container>
@@ -48,9 +71,19 @@ export default function Students() {
               <FaEdit size={16} />
             </Link>
 
-            <Link to={`/student/${student.id}/delete`}>
+            <Link
+              onClick={handleDeleteConfirm}
+              to={`/student/${student.id}/delete`}
+            >
               <FaWindowClose size={16} />
             </Link>
+
+            <FaExclamation
+              size={16}
+              display="none"
+              cursor="pointer"
+              onClick={(e) => handleDelete(e, student.id)}
+            />
           </div>
         ))}
       </StudentContainer>
