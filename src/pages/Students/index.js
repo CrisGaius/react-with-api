@@ -39,13 +39,21 @@ export default function Students() {
     e.currentTarget.remove();
   };
 
-  const handleDelete = async (e, id) => {
+  const handleDelete = async (e, id, index) => {
+    e.persist();
+
     try {
+      setIsLoading(true);
       await axios.delete(`/students/${id}`);
-      e.target.parentElement.remove();
+      const newStudents = [...students];
+      newStudents.splice(index, 1);
+      setStudents(newStudents);
+      setIsLoading(false);
+      toast.success(`${id} excluído com sucesso.`);
     } catch (err) {
       const errors = get(err, "response.data.errors", []);
       errors.map((error) => toast.error(error));
+      setIsLoading(false);
     }
   };
 
@@ -54,7 +62,7 @@ export default function Students() {
       <Loading isLoading={isLoading} />
       <h1>Students</h1>
       <StudentContainer>
-        {students.map((student) => (
+        {students.map((student, index) => (
           <div key={String(student.id)}>
             <ProfilePicture>
               {get(student, "StudentPhotos[0].url", false) ? (
@@ -82,7 +90,7 @@ export default function Students() {
               size={16}
               display="none"
               cursor="pointer"
-              onClick={(e) => handleDelete(e, student.id)}
+              onClick={(e) => handleDelete(e, student.id, index)}
             />
           </div>
         ))}
