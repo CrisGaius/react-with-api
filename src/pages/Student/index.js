@@ -4,13 +4,17 @@ import PropTypes from "prop-types";
 import { isEmail, isInt, isFloat } from "validator";
 import { toast } from "react-toastify";
 import { get } from "lodash";
+import { useDispatch } from "react-redux";
 import { Container } from "../../styles/GlobalStyles";
 import { Form } from "./styled";
 import Loading from "../../components/Loading/index";
 import axios from "../../services/axios";
 import history from "../../services/history";
+import * as actions from "../../store/modules/auth/actions";
 
 export default function Student({ match }) {
+  const dispatch = useDispatch();
+
   const id = match.params.id || 0;
   const [name, setName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -55,7 +59,7 @@ export default function Student({ match }) {
     getData();
   }, [id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let formHasErrors = false;
@@ -80,17 +84,58 @@ export default function Student({ match }) {
       formHasErrors = true;
     }
 
-    if (!isFloat(weight)) {
+    if (!isFloat(String(weight))) {
       toast.error("Weight must be greater than zero.");
       formHasErrors = true;
     }
 
-    if (!isFloat(height)) {
+    if (!isFloat(String(height))) {
       toast.error("Height must be greater than zero.");
       formHasErrors = true;
     }
 
-    console.log(formHasErrors);
+    if (formHasErrors) return;
+
+    try {
+      setIsLoading(true);
+      if (id) {
+        await axios.put(`/students/${id}`, {
+          name,
+          last_name: lastName,
+          email,
+          age,
+          weight,
+          height,
+        });
+        toast.success("Student successfully edited!");
+      } else {
+        const { data } = await axios.post("/students", {
+          name,
+          last_name: lastName,
+          email,
+          age,
+          weight,
+          height,
+        });
+        toast.success("Student successfully created!");
+        history.push(`/student/${data.id}/edit`);
+      }
+      setIsLoading(false);
+    } catch (err) {
+      const status = get(err, "response.status", 0);
+      const errors = get(err, "response.data.errors", []);
+      const errorsList = [];
+      errorsList.push(errors);
+
+      if (errorsList.length > 0) {
+        errorsList.forEach((error) => toast.error(error));
+      } else {
+        toast.error("Unknown error.");
+      }
+
+      if (status === 401) dispatch(actions.loginFailure());
+      setIsLoading(false);
+    }
   };
 
   return (
