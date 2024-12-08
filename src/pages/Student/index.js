@@ -5,8 +5,10 @@ import { isEmail, isInt, isFloat } from "validator";
 import { toast } from "react-toastify";
 import { get } from "lodash";
 import { useDispatch } from "react-redux";
+import { FaEdit, FaUserCircle } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import { Container } from "../../styles/GlobalStyles";
-import { Form } from "./styled";
+import { Form, ProfilePicture, Title } from "./styled";
 import Loading from "../../components/Loading/index";
 import axios from "../../services/axios";
 import history from "../../services/history";
@@ -22,6 +24,7 @@ export default function Student({ match }) {
   const [age, setAge] = useState("");
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
+  const [photo, setPhoto] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -32,7 +35,9 @@ export default function Student({ match }) {
         setIsLoading(true);
 
         const { data } = await axios.get(`/students/${id}`);
-        // const Photo = get(data, "Photos[0].url", "");
+        const Photo = get(data, "StudentPhotos[0].url", "");
+
+        setPhoto(Photo);
 
         setName(data.name);
         setLastName(data.last_name);
@@ -141,7 +146,16 @@ export default function Student({ match }) {
   return (
     <Container>
       <Loading isLoading={isLoading} />
-      <h1>{id ? "Edit Student" : "New Student"}</h1>
+      <Title>{id ? "Edit Student" : "New Student"}</Title>
+
+      {id !== 0 && (
+        <ProfilePicture>
+          {photo ? <img src={photo} alt={name} /> : <FaUserCircle size={180} />}
+          <Link to={`/photos/${id}`}>
+            <FaEdit size={24} />
+          </Link>
+        </ProfilePicture>
+      )}
 
       <Form onSubmit={handleSubmit}>
         <input
